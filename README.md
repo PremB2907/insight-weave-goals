@@ -85,7 +85,7 @@ Through this project, I gained hands-on experience in:
 ## 👨‍💻 Author
 
 **Prem Baraskar**  
-🎓 B.Tech IT / Cyber Security Student  
+🎓 B.Tech IT Student  
 🔗 LinkedIn: https://www.linkedin.com/in/prem-baraskar-a155b2327/  
 🌐 Portfolio: https://prem-baraskar-portfolio-hub.lovable.app  
 
