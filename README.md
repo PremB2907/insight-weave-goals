@@ -1,73 +1,101 @@
-# Welcome to your Lovable project
+# Insight Weave – Goals
 
-## Project info
+🔗 Live Application: https://insight-weave-goals.lovable.app  
+📦 Repository: https://github.com/PremB2907/insight-weave-goals  
 
-**URL**: https://lovable.dev/projects/5ad0f5b4-88a7-4817-b14c-a8134bee34f8
+Insight Weave – Goals is a **goal tracking and self-reflection web application** designed to help users organize their goals, track progress, and reflect on personal growth in a structured and meaningful way.
 
-## How can I edit this code?
+---
 
-There are several ways of editing your application.
+## 📌 About the Project
 
-**Use Lovable**
+Insight Weave – Goals focuses on **clarity, consistency, and reflection**.  
+Instead of overwhelming users with complex dashboards, the application provides a clean and minimal interface to:
 
-Simply visit the [Lovable Project](https://lovable.dev/projects/5ad0f5b4-88a7-4817-b14c-a8134bee34f8) and start prompting.
+- Define goals clearly  
+- Track progress over time  
+- Reflect on achievements and improvements  
+- Stay consistent with personal or academic objectives  
 
-Changes made via Lovable will be committed automatically to this repo.
+This project was built as part of my learning journey in **web development and application design**, with emphasis on usability and simplicity.
 
-**Use your preferred IDE**
+---
 
-If you want to work locally using your own IDE, you can clone this repo and push changes. Pushed changes will also be reflected in Lovable.
+## ✨ Features
 
-The only requirement is having Node.js & npm installed - [install with nvm](https://github.com/nvm-sh/nvm#installing-and-updating)
+- 📝 Create and manage personal goals  
+- 📊 Track progress in an intuitive way  
+- 🧠 Encourage reflection and self-assessment  
+- 🎯 Clean, distraction-free user interface  
+- 🌐 Fully web-based and accessible  
 
-Follow these steps:
+---
 
-```sh
-# Step 1: Clone the repository using the project's Git URL.
-git clone <YOUR_GIT_URL>
+## 🛠️ Tech Stack
 
-# Step 2: Navigate to the project directory.
-cd <YOUR_PROJECT_NAME>
+- **Frontend:** HTML, CSS, JavaScript  
+- **Platform:** Lovable App  
+- **Version Control:** Git & GitHub  
 
-# Step 3: Install the necessary dependencies.
-npm i
+*(The project is frontend-focused and designed to be lightweight and easy to use.)*
 
-# Step 4: Start the development server with auto-reloading and an instant preview.
-npm run dev
-```
+---
 
-**Edit a file directly in GitHub**
+## 🚀 Live Demo
 
-- Navigate to the desired file(s).
-- Click the "Edit" button (pencil icon) at the top right of the file view.
-- Make your changes and commit the changes.
+You can try the application here:  
+👉 **https://insight-weave-goals.lovable.app**
 
-**Use GitHub Codespaces**
+---
 
-- Navigate to the main page of your repository.
-- Click on the "Code" button (green button) near the top right.
-- Select the "Codespaces" tab.
-- Click on "New codespace" to launch a new Codespace environment.
-- Edit files directly within the Codespace and commit and push your changes once you're done.
+## 📂 Project Structure (Overview)
 
-## What technologies are used for this project?
+insight-weave-goals/
+│
+├── index.html
+├── styles.css
+├── script.js
+└── assets/
 
-This project is built with:
+*(Structure may vary depending on deployment setup.)*
 
-- Vite
-- TypeScript
-- React
-- shadcn-ui
-- Tailwind CSS
+---
 
-## How can I deploy this project?
+## 📖 What I Learned
 
-Simply open [Lovable](https://lovable.dev/projects/5ad0f5b4-88a7-4817-b14c-a8134bee34f8) and click on Share -> Publish.
+Through this project, I gained hands-on experience in:
 
-## Can I connect a custom domain to my Lovable project?
+- Designing user-centric interfaces  
+- Structuring frontend logic for usability  
+- Deploying web applications  
+- Improving consistency in goal-oriented applications  
 
-Yes, you can!
+---
 
-To connect a domain, navigate to Project > Settings > Domains and click Connect Domain.
+## 🔮 Future Improvements
 
-Read more here: [Setting up a custom domain](https://docs.lovable.dev/features/custom-domain#custom-domain)
+- User authentication  
+- Cloud-based data storage  
+- Analytics for goal completion  
+- Improved UI/UX animations  
+- Mobile-first optimizations  
+
+---
+
+## 👨‍💻 Author
+
+**Prem Baraskar**  
+🎓 B.Tech IT / Cyber Security Student  
+🔗 LinkedIn: https://www.linkedin.com/in/prem-baraskar-a155b2327/  
+🌐 Portfolio: https://prem-baraskar-portfolio-hub.lovable.app  
+
+---
+
+## 📄 License
+
+This project is for **educational and learning purposes**.  
+Feel free to explore, learn, and suggest improvements.
+
+---
+
+✨ *Built with curiosity, reflection, and continuous learning.*
