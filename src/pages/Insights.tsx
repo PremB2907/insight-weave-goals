@@ -1,68 +1,79 @@
 import Navigation from "@/components/Navigation";
 import { Card } from "@/components/ui/card";
 import { TrendingUp, TrendingDown, Activity, Moon, Heart, Brain } from "lucide-react";
+import { useAppContext } from "@/contexts/AppContext";
+import { useMemo } from "react";
 
 const Insights = () => {
-  const keyInsights = [
-    {
-      icon: Activity,
-      title: "Exercise Impact",
-      trend: "positive",
-      description: "Your mood score is 23% higher on days you exercise",
-      recommendation: "Try morning workouts - they correlate with better energy throughout the day"
-    },
-    {
-      icon: Moon,
-      title: "Sleep Patterns",
-      trend: "attention",
-      description: "Sleep quality drops by 30% on days with 4+ hours of evening screen time",
-      recommendation: "Consider setting a digital sunset at 8 PM for better rest"
-    },
-    {
-      icon: Heart,
-      title: "Emotional Wellness",
-      trend: "positive",
-      description: "Meditation days show 18% lower stress levels",
-      recommendation: "Your optimal time appears to be 7-8 AM based on consistency data"
-    }
-  ];
+  const { journalEntries } = useAppContext();
 
-  const correlations = [
-    {
-      factor: "Exercise → Mood",
-      strength: 85,
-      description: "Strong positive correlation",
-      color: "accent"
-    },
-    {
-      factor: "Sleep → Energy",
-      strength: 78,
-      description: "Strong positive correlation",
-      color: "primary"
-    },
-    {
-      factor: "Screen Time → Sleep",
-      strength: 62,
-      description: "Moderate negative correlation",
-      color: "destructive"
-    },
-    {
-      factor: "Social Time → Happiness",
-      strength: 71,
-      description: "Strong positive correlation",
-      color: "accent"
-    }
-  ];
+  const keyInsights = useMemo(() => {
+    const avgSleep = journalEntries.reduce((a, b) => a + b.sleepHours, 0) / (journalEntries.length || 1);
+    const avgMood = journalEntries.reduce((a, b) => a + b.mood, 0) / (journalEntries.length || 1);
+    const avgStress = journalEntries.reduce((a, b) => a + b.stress, 0) / (journalEntries.length || 1);
+    
+    return [
+      {
+        icon: Activity,
+        title: "Mood Trend",
+        trend: avgMood > 6 ? "positive" : "attention",
+        description: `Your average mood score is ${avgMood.toFixed(1)}/10`,
+        recommendation: avgMood > 6 ? "Your mood is trending positively!" : "Try to engage in more relaxing activities."
+      },
+      {
+        icon: Moon,
+        title: "Sleep Patterns",
+        trend: avgSleep >= 7 ? "positive" : "attention",
+        description: `You are averaging ${avgSleep.toFixed(1)} hours of sleep.`,
+        recommendation: avgSleep >= 7 ? "You are getting healthy sleep amounts." : "Consider setting a digital sunset at 8 PM for better rest."
+      },
+      {
+        icon: Heart,
+        title: "Emotional Wellness",
+        trend: avgStress < 6 ? "positive" : "attention",
+        description: `Your average stress is ${avgStress.toFixed(1)}/10`,
+        recommendation: avgStress < 6 ? "You are managing stress well." : "Try incorporating daily meditation."
+      }
+    ];
+  }, [journalEntries]);
+  const correlations = useMemo(() => {
+    const avgSleep = journalEntries.reduce((a, b) => a + b.sleepHours, 0) / (journalEntries.length || 1);
+    const sleepStrength = Math.min(100, Math.floor((avgSleep / 8) * 100));
+    
+    return [
+      {
+        factor: "Sleep → Energy",
+        strength: sleepStrength,
+        description: sleepStrength > 70 ? "Strong positive correlation" : "Moderate correlation",
+        color: "primary"
+      },
+      {
+        factor: "Stress → Mood",
+        strength: 82, // Hardcoded correlation mock for prototype
+        description: "Strong negative correlation",
+        color: "accent"
+      },
+      {
+        factor: "Logging Habits",
+        strength: Math.min(100, journalEntries.length * 15),
+        description: "Consistency metric",
+        color: "secondary"
+      }
+    ];
+  }, [journalEntries]);
 
-  const weeklyTrends = [
-    { day: "Mon", mood: 7, energy: 6, sleep: 7.2 },
-    { day: "Tue", mood: 8, energy: 8, sleep: 7.8 },
-    { day: "Wed", mood: 7, energy: 7, sleep: 7.5 },
-    { day: "Thu", mood: 9, energy: 8, sleep: 8.2 },
-    { day: "Fri", mood: 8, energy: 7, sleep: 7.0 },
-    { day: "Sat", mood: 9, energy: 9, sleep: 8.5 },
-    { day: "Sun", mood: 8, energy: 7, sleep: 8.0 }
-  ];
+  const weeklyTrends = useMemo(() => {
+    return [...journalEntries].slice(0, 7).reverse().map(entry => {
+      const d = new Date(entry.date);
+      const dayStr = d.toLocaleDateString('en-US', { weekday: 'short' });
+      return {
+        day: dayStr,
+        mood: entry.mood,
+        energy: entry.energy,
+        sleep: entry.sleepHours
+      };
+    });
+  }, [journalEntries]);
 
   const maxValue = 10;
 

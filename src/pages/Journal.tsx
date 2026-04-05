@@ -4,13 +4,33 @@ import { Card } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import { Label } from "@/components/ui/label";
 import { Slider } from "@/components/ui/slider";
-import { Calendar, Moon, Heart, Activity, Save } from "lucide-react";
+import { Brain, Calendar, Moon, Heart, Activity, Save } from "lucide-react";
 import { useState } from "react";
+import { useAppContext } from "@/contexts/AppContext";
 
 const Journal = () => {
+  const { journalEntries, addJournalEntry } = useAppContext();
   const [moodScore, setMoodScore] = useState([7]);
   const [energyLevel, setEnergyLevel] = useState([6]);
   const [stressLevel, setStressLevel] = useState([4]);
+
+  const [sleepQuality, setSleepQuality] = useState([7]);
+  const [sleepHours, setSleepHours] = useState(7.5);
+  
+  const [journalEntry, setJournalEntry] = useState("");
+
+  const handleSaveEntry = () => {
+    if (!journalEntry.trim()) return;
+    addJournalEntry({
+      mood: moodScore[0],
+      energy: energyLevel[0],
+      stress: stressLevel[0],
+      sleepHours: sleepHours,
+      sleepQuality: sleepQuality[0],
+      preview: journalEntry
+    });
+    setJournalEntry("");
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -48,6 +68,8 @@ const Journal = () => {
                   id="journal-entry"
                   placeholder="Write about your thoughts, feelings, experiences, or anything on your mind..."
                   className="min-h-[200px] resize-none"
+                  value={journalEntry}
+                  onChange={(e) => setJournalEntry(e.target.value)}
                 />
               </div>
 
@@ -98,7 +120,7 @@ const Journal = () => {
                 <div>
                   <div className="flex items-center justify-between mb-3">
                     <Label className="text-base font-semibold flex items-center">
-                      <Moon className="w-4 h-4 mr-2 text-primary" />
+                      <Brain className="w-4 h-4 mr-2 text-primary" />
                       Stress Level
                     </Label>
                     <span className="text-2xl font-bold text-foreground">{stressLevel[0]}/10</span>
@@ -115,9 +137,52 @@ const Journal = () => {
                     <span>Stressed</span>
                   </div>
                 </div>
+
+                <div className="pt-6 border-t border-border mt-6">
+                  <h3 className="text-lg font-semibold text-foreground mb-4 flex items-center">
+                    <Moon className="w-5 h-5 mr-2 text-primary" />
+                    Sleep Patterns
+                  </h3>
+                  <div className="space-y-6">
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <Label className="text-base font-semibold">
+                          Hours Slept
+                        </Label>
+                        <span className="text-2xl font-bold text-foreground">{sleepHours} hrs</span>
+                      </div>
+                      <Slider
+                        value={[sleepHours]}
+                        onValueChange={(val) => setSleepHours(val[0])}
+                        max={24}
+                        step={0.5}
+                        className="mb-2"
+                      />
+                    </div>
+                    <div>
+                      <div className="flex items-center justify-between mb-3">
+                        <Label className="text-base font-semibold">
+                          Sleep Quality
+                        </Label>
+                        <span className="text-2xl font-bold text-foreground">{sleepQuality[0]}/10</span>
+                      </div>
+                      <Slider
+                        value={sleepQuality}
+                        onValueChange={setSleepQuality}
+                        max={10}
+                        step={1}
+                        className="mb-2"
+                      />
+                      <div className="flex justify-between text-xs text-muted-foreground">
+                        <span>Poor</span>
+                        <span>Excellent</span>
+                      </div>
+                    </div>
+                  </div>
+                </div>
               </div>
 
-              <Button className="w-full mt-6 bg-gradient-primary">
+              <Button className="w-full mt-6 bg-gradient-primary" onClick={handleSaveEntry}>
                 <Save className="w-4 h-4 mr-2" />
                 Save Entry
               </Button>
@@ -127,17 +192,15 @@ const Journal = () => {
             <Card className="p-6">
               <h2 className="text-xl font-semibold text-foreground mb-4">Recent Entries</h2>
               <div className="space-y-4">
-                {[
-                  { date: "Yesterday", mood: 8, preview: "Had a productive day! Completed my workout and..." },
-                  { date: "2 days ago", mood: 6, preview: "Felt a bit tired but managed to stay focused on..." },
-                  { date: "3 days ago", mood: 9, preview: "Amazing day! Everything went smoothly and I felt..." },
-                ].map((entry, index) => (
+                {journalEntries.map((entry) => (
                   <div
-                    key={index}
+                    key={entry.id}
                     className="p-4 rounded-xl border border-border hover:border-primary/30 transition-all duration-200 cursor-pointer"
                   >
                     <div className="flex items-center justify-between mb-2">
-                      <span className="text-sm font-medium text-muted-foreground">{entry.date}</span>
+                      <span className="text-sm font-medium text-muted-foreground">
+                        {new Date(entry.date).toLocaleDateString()}
+                      </span>
                       <span className="text-sm font-semibold text-primary">
                         Mood: {entry.mood}/10
                       </span>

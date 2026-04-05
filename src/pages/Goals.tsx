@@ -3,50 +3,64 @@ import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
 import { Target, Plus, TrendingUp, CheckCircle2, Circle } from "lucide-react";
+import { useState, useMemo } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useAppContext } from "@/contexts/AppContext";
 
 const Goals = () => {
-  const activeGoals = [
-    {
-      title: "Exercise 4 times per week",
-      description: "Based on your mood patterns, regular exercise improves your emotional well-being by 23%",
-      current: 3,
-      target: 4,
-      unit: "workouts",
-      color: "primary",
-      insights: ["Best days: Tuesday, Thursday", "Morning sessions most effective"]
-    },
-    {
-      title: "Sleep 8 hours nightly",
-      description: "Your energy levels are 15% higher on days with 7.5+ hours of sleep",
-      current: 7.2,
-      target: 8,
-      unit: "hours",
-      color: "accent",
-      insights: ["Consistent bedtime helps", "Avoid screens after 9 PM"]
-    },
-    {
-      title: "Meditate 10 minutes daily",
-      description: "Meditation days correlate with 18% lower stress scores",
-      current: 6,
-      target: 10,
-      unit: "minutes",
-      color: "secondary",
-      insights: ["Morning practice recommended", "Use breathing exercises"]
-    }
-  ];
+  const { goals: activeGoals, addGoal, journalEntries } = useAppContext();
+  const [isAddGoalOpen, setIsAddGoalOpen] = useState(false);
+  const [newGoal, setNewGoal] = useState({ title: "", target: 0, unit: "" });
 
-  const suggestedGoals = [
-    {
-      title: "Reduce evening screen time",
-      reason: "High screen time after 8 PM affects your sleep quality",
-      impact: "Could improve sleep by 20%"
-    },
-    {
-      title: "Morning journaling routine",
-      reason: "Days with morning reflection show better mood scores",
-      impact: "Potential 15% mood boost"
+  const handleAddGoal = () => {
+    if (!newGoal.title.trim() || newGoal.target <= 0 || !newGoal.unit.trim()) return;
+    addGoal({
+      title: newGoal.title,
+      description: "Manually added goal",
+      target: newGoal.target,
+      unit: newGoal.unit
+    });
+    setNewGoal({ title: "", target: 0, unit: "" });
+    setIsAddGoalOpen(false);
+  };
+
+  const dynamicSuggestedGoals = useMemo(() => {
+    if (!journalEntries || journalEntries.length === 0) return [];
+    
+    // Calculate averages
+    const avgSleep = journalEntries.reduce((acc, curr) => acc + curr.sleepHours, 0) / journalEntries.length;
+    const avgStress = journalEntries.reduce((acc, curr) => acc + curr.stress, 0) / journalEntries.length;
+    
+    const suggestions = [];
+    
+    if (avgSleep < 7) {
+      suggestions.push({
+        title: "Sleep 8 hours nightly",
+        reason: `Your average sleep is currently only ${avgSleep.toFixed(1)} hours.`,
+        impact: "Could improve daily energy by 20%"
+      });
     }
-  ];
+    
+    if (avgStress > 5) {
+      suggestions.push({
+        title: "Meditate 10 minutes daily",
+        reason: `Your average stress level is elevated (${avgStress.toFixed(1)}/10).`,
+        impact: "Meditation correlates with lower stress"
+      });
+    }
+    
+    if (suggestions.length === 0) {
+      suggestions.push({
+        title: "Morning journaling routine",
+        reason: "Days with morning reflection show better mood scores",
+        impact: "Potential 15% mood boost"
+      });
+    }
+    
+    return suggestions;
+  }, [journalEntries]);
 
   const completedGoals = [
     { title: "Walk 10,000 steps daily", completedDate: "2 weeks ago", duration: "30 days" },
@@ -69,10 +83,55 @@ const Goals = () => {
             <div className="lg:col-span-2 space-y-6">
               <div className="flex items-center justify-between">
                 <h2 className="text-2xl font-bold text-foreground">Active Goals</h2>
-                <Button className="bg-gradient-primary">
-                  <Plus className="w-4 h-4 mr-2" />
-                  Custom Goal
-                </Button>
+                <Dialog open={isAddGoalOpen} onOpenChange={setIsAddGoalOpen}>
+                  <DialogTrigger asChild>
+                    <Button className="bg-gradient-primary">
+                      <Plus className="w-4 h-4 mr-2" />
+                      Custom Goal
+                    </Button>
+                  </DialogTrigger>
+                  <DialogContent>
+                    <DialogHeader>
+                      <DialogTitle>Create Custom Goal</DialogTitle>
+                    </DialogHeader>
+                    <div className="space-y-4 py-4">
+                      <div>
+                        <Label htmlFor="title" className="mb-2 block">Goal Title</Label>
+                        <Input 
+                          id="title"
+                          placeholder="e.g. Read 3 books"
+                          value={newGoal.title}
+                          onChange={(e) => setNewGoal({...newGoal, title: e.target.value})}
+                        />
+                      </div>
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="target" className="mb-2 block">Target Value</Label>
+                          <Input 
+                            id="target"
+                            type="number"
+                            min="1"
+                            value={newGoal.target || ""}
+                            onChange={(e) => setNewGoal({...newGoal, target: parseInt(e.target.value) || 0})}
+                          />
+                        </div>
+                        <div>
+                          <Label htmlFor="unit" className="mb-2 block">Unit</Label>
+                          <Input 
+                            id="unit"
+                            placeholder="e.g. books"
+                            value={newGoal.unit}
+                            onChange={(e) => setNewGoal({...newGoal, unit: e.target.value})}
+                          />
+                        </div>
+                      </div>
+                    </div>
+                    <DialogFooter>
+                      <Button variant="outline" onClick={() => setIsAddGoalOpen(false)}>Cancel</Button>
+                      <Button onClick={handleAddGoal}>Save Goal</Button>
+                    </DialogFooter>
+                  </DialogContent>
+                </Dialog>
               </div>
 
               {activeGoals.map((goal, index) => (
@@ -124,12 +183,15 @@ const Goals = () => {
                   Suggested Goals
                 </h3>
                 <div className="space-y-4">
-                  {suggestedGoals.map((goal, index) => (
+                  {dynamicSuggestedGoals.map((goal, index) => (
                     <div key={index} className="bg-background rounded-lg p-4 border border-border">
                       <h4 className="font-semibold text-foreground mb-2 text-sm">{goal.title}</h4>
                       <p className="text-xs text-muted-foreground mb-2">{goal.reason}</p>
                       <p className="text-xs font-medium text-accent mb-3">{goal.impact}</p>
-                      <Button variant="outline" size="sm" className="w-full">
+                      <Button variant="outline" size="sm" className="w-full" onClick={() => {
+                        setNewGoal({ title: goal.title, target: 1, unit: "times" });
+                        setIsAddGoalOpen(true);
+                      }}>
                         <Plus className="w-3 h-3 mr-1" />
                         Add Goal
                       </Button>

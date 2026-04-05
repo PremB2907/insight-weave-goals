@@ -9,26 +9,29 @@ import Journal from "./pages/Journal";
 import Goals from "./pages/Goals";
 import Insights from "./pages/Insights";
 import NotFound from "./pages/NotFound";
+import { AppProvider } from "./contexts/AppContext";
 
 const queryClient = new QueryClient();
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
-    <TooltipProvider>
-      <Toaster />
-      <Sonner />
-      <BrowserRouter>
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/journal" element={<Journal />} />
-          <Route path="/goals" element={<Goals />} />
-          <Route path="/insights" element={<Insights />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
-      </BrowserRouter>
-    </TooltipProvider>
+    <AppProvider>
+      <TooltipProvider>
+        <Toaster />
+        <Sonner />
+        <BrowserRouter>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/journal" element={<Journal />} />
+            <Route path="/goals" element={<Goals />} />
+            <Route path="/insights" element={<Insights />} />
+            {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </BrowserRouter>
+      </TooltipProvider>
+    </AppProvider>
   </QueryClientProvider>
 );
 

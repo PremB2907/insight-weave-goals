@@ -1,23 +1,29 @@
 import Navigation from "@/components/Navigation";
 import StatCard from "@/components/StatCard";
-import { Activity, Moon, Heart, Target, TrendingUp, Plus } from "lucide-react";
+import { Activity, Moon, Heart, Target, TrendingUp, Plus, Award } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
 import { Progress } from "@/components/ui/progress";
+import { useState } from "react";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger, DialogFooter } from "@/components/ui/dialog";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useNavigate } from "react-router-dom";
+import { useAppContext } from "@/contexts/AppContext";
 
 const Dashboard = () => {
-  const habits = [
-    { name: "Morning Exercise", streak: 12, completed: true, progress: 85 },
-    { name: "Reading", streak: 8, completed: true, progress: 70 },
-    { name: "Meditation", streak: 15, completed: false, progress: 60 },
-    { name: "Hydration", streak: 20, completed: true, progress: 95 },
-  ];
+  const navigate = useNavigate();
+  const { habits, addHabit, toggleHabit, goals, achievements } = useAppContext();
 
-  const goals = [
-    { name: "Exercise 4x/week", current: 3, target: 4, color: "primary" },
-    { name: "Sleep 8hrs nightly", current: 7.2, target: 8, color: "accent" },
-    { name: "Read 30min daily", current: 25, target: 30, color: "secondary" },
-  ];
+  const [newHabitName, setNewHabitName] = useState("");
+  const [isAddHabitOpen, setIsAddHabitOpen] = useState(false);
+
+  const handleAddHabit = () => {
+    if (!newHabitName.trim()) return;
+    addHabit(newHabitName);
+    setNewHabitName("");
+    setIsAddHabitOpen(false);
+  };
 
   return (
     <div className="min-h-screen bg-background">
@@ -64,10 +70,32 @@ const Dashboard = () => {
               <Card className="p-6">
                 <div className="flex items-center justify-between mb-6">
                   <h2 className="text-2xl font-bold text-foreground">Today's Habits</h2>
-                  <Button className="bg-gradient-primary">
-                    <Plus className="w-4 h-4 mr-2" />
-                    Add Habit
-                  </Button>
+                  <Dialog open={isAddHabitOpen} onOpenChange={setIsAddHabitOpen}>
+                    <DialogTrigger asChild>
+                      <Button className="bg-gradient-primary">
+                        <Plus className="w-4 h-4 mr-2" />
+                        Add Habit
+                      </Button>
+                    </DialogTrigger>
+                    <DialogContent>
+                      <DialogHeader>
+                        <DialogTitle>Create New Habit</DialogTitle>
+                      </DialogHeader>
+                      <div className="py-4">
+                        <Label htmlFor="habitName" className="mb-2 block">Habit Name</Label>
+                        <Input 
+                          id="habitName"
+                          placeholder="e.g. Drink Water"
+                          value={newHabitName}
+                          onChange={(e) => setNewHabitName(e.target.value)}
+                        />
+                      </div>
+                      <DialogFooter>
+                        <Button variant="outline" onClick={() => setIsAddHabitOpen(false)}>Cancel</Button>
+                        <Button onClick={handleAddHabit}>Save Habit</Button>
+                      </DialogFooter>
+                    </DialogContent>
+                  </Dialog>
                 </div>
                 <div className="space-y-4">
                   {habits.map((habit, index) => (
@@ -94,6 +122,7 @@ const Dashboard = () => {
                         <Button
                           variant={habit.completed ? "default" : "outline"}
                           className={habit.completed ? "bg-accent" : ""}
+                          onClick={() => toggleHabit(habit.id)}
                         >
                           {habit.completed ? "Completed" : "Mark Done"}
                         </Button>
@@ -116,7 +145,7 @@ const Dashboard = () => {
                   {goals.map((goal, index) => (
                     <div key={index}>
                       <div className="flex items-center justify-between mb-2">
-                        <h3 className="font-medium text-foreground text-sm">{goal.name}</h3>
+                        <h3 className="font-medium text-foreground text-sm">{goal.title}</h3>
                         <span className="text-sm font-semibold text-primary">
                           {goal.current}/{goal.target}
                         </span>
@@ -138,14 +167,39 @@ const Dashboard = () => {
               <Card className="p-6 mt-6 bg-gradient-hero">
                 <h3 className="font-semibold text-foreground mb-4">Quick Actions</h3>
                 <div className="space-y-2">
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/journal")}>
                     <Moon className="w-4 h-4 mr-2" />
                     Log Sleep
                   </Button>
-                  <Button variant="outline" className="w-full justify-start">
+                  <Button variant="outline" className="w-full justify-start" onClick={() => navigate("/journal")}>
                     <Heart className="w-4 h-4 mr-2" />
                     Record Mood
                   </Button>
+                </div>
+              </Card>
+
+              {/* Achievements */}
+              <Card className="p-6 mt-6">
+                <div className="flex items-center justify-between mb-4">
+                  <h3 className="font-semibold text-foreground">Recent Badges</h3>
+                  <Award className="w-5 h-5 text-accent" />
+                </div>
+                <div className="space-y-4">
+                  {achievements.filter(a => a.unlockedAt).length === 0 ? (
+                    <p className="text-sm text-muted-foreground text-center py-4">Keep tracking to unlock badges!</p>
+                  ) : (
+                    achievements.filter(a => a.unlockedAt).map((achievement) => (
+                      <div key={achievement.id} className="flex items-center space-x-3 bg-muted/50 p-3 rounded-lg border border-border/50">
+                        <div className="w-10 h-10 rounded-full bg-accent/20 flex items-center justify-center flex-shrink-0">
+                          <Award className="w-5 h-5 text-accent" />
+                        </div>
+                        <div>
+                          <p className="text-sm font-semibold text-foreground">{achievement.title}</p>
+                          <p className="text-xs text-muted-foreground">{new Date(achievement.unlockedAt!).toLocaleDateString()}</p>
+                        </div>
+                      </div>
+                    ))
+                  )}
                 </div>
               </Card>
             </div>
