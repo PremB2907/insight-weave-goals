@@ -1,0 +1,169 @@
+{
+  "users": [
+    {
+      "id": "u1",
+      "username": "Priya",
+      "email": "priya@example.com",
+      "password": "demo123",
+      "avatar": "P"
+    },
+    {
+      "id": "u2",
+      "username": "Arjun",
+      "email": "arjun@example.com",
+      "password": "demo123",
+      "avatar": "A"
+    },
+    {
+      "id": "u3",
+      "username": "Mira",
+      "email": "mira@example.com",
+      "password": "demo123",
+      "avatar": "M"
+    },
+    {
+      "id": "u4",
+      "username": "Noah",
+      "email": "noah@example.com",
+      "password": "demo123",
+      "avatar": "N"
+    }
+  ],
+  "habits": [
+    {
+      "id": "h1",
+      "userId": "u1",
+      "name": "Morning Exercise",
+      "frequency": "daily",
+      "reminderTime": "08:00",
+      "checkIns": [
+        "2026-04-10",
+        "2026-04-09",
+        "2026-04-08"
+      ],
+      "streak": 3,
+      "currentStreak": 3,
+      "longestStreak": 12,
+      "completedToday": true,
+      "progress": 100
+    },
+    {
+      "id": "h2",
+      "userId": "u1",
+      "name": "Reading",
+      "frequency": "daily",
+      "reminderTime": "20:00",
+      "checkIns": [
+        "2026-04-10",
+        "2026-04-09"
+      ],
+      "streak": 2,
+      "currentStreak": 2,
+      "longestStreak": 8,
+      "completedToday": true,
+      "progress": 100
+    },
+    {
+      "id": "h3",
+      "userId": "u2",
+      "name": "Meditation",
+      "frequency": "daily",
+      "reminderTime": "07:00",
+      "checkIns": [
+        "2026-04-09",
+        "2026-04-08",
+        "2026-04-07"
+      ],
+      "streak": 0,
+      "currentStreak": 0,
+      "longestStreak": 15,
+      "completedToday": false,
+      "progress": 0
+    },
+    {
+      "id": "h4",
+      "userId": "u3",
+      "name": "Hydration",
+      "frequency": "daily",
+      "reminderTime": "09:00",
+      "checkIns": [
+        "2026-04-10",
+        "2026-04-09",
+        "2026-04-08",
+        "2026-04-07"
+      ],
+      "streak": 4,
+      "currentStreak": 4,
+      "longestStreak": 20,
+      "completedToday": true,
+      "progress": 100
+    }
+  ],
+  "goals": [
+    {
+      "id": "g1",
+      "userId": "u1",
+      "title": "Exercise 4 times per week",
+      "description": "Based on your mood patterns, regular exercise improves your emotional well-being by 23%",
+      "current": 3,
+      "target": 4,
+      "unit": "workouts",
+      "color": "primary",
+      "insights": [
+        "Best days: Tuesday, Thursday",
+        "Morning sessions most effective"
+      ]
+    },
+    {
+      "id": "g2",
+      "userId": "u1",
+      "title": "Sleep 8 hours nightly",
+      "description": "Your energy levels are 15% higher on days with 7.5+ hours of sleep",
+      "current": 7.2,
+      "target": 8,
+      "unit": "hours",
+      "color": "accent",
+      "insights": [
+        "Consistent bedtime helps",
+        "Avoid screens after 9 PM"
+      ]
+    }
+  ],
+  "journalEntries": [
+    {
+      "id": "j1",
+      "userId": "u1",
+      "date": "2026-04-09T12:00:00.000Z",
+      "mood": 8,
+      "energy": 7,
+      "stress": 4,
+      "sleepHours": 7.5,
+      "sleepQuality": 8,
+      "preview": "Had a productive day! Completed my workout and..."
+    },
+    {
+      "id": "j2",
+      "userId": "u1",
+      "date": "2026-04-08T12:00:00.000Z",
+      "mood": 6,
+      "energy": 5,
+      "stress": 7,
+      "sleepHours": 6.0,
+      "sleepQuality": 5,
+      "preview": "Felt a bit tired but managed to stay focused on..."
+    }
+  ],
+  "notes": [
+    {
+      "id": "n1",
+      "title": "Sprint Plan",
+      "content": "Define the core goals for the next demo and capture any risks or blockers.\n\n- Build notes module\n- Add leaderboard\n- Polish habit streaks",
+      "ownerId": "u1",
+      "collaborators": ["u2", "u3"],
+      "shareToken": "note-shared-01",
+      "shareMode": "edit",
+      "createdAt": "2026-04-08T10:00:00.000Z",
+      "updatedAt": "2026-04-09T14:00:00.000Z"
+    }
+  ]
+}

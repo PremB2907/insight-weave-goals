@@ -1,11 +1,18 @@
 import React, { createContext, useContext, useState, useEffect } from 'react';
-import { toast } from "sonner";
+import { toast } from 'sonner';
+import { api } from '@/lib/api';
 
 export interface Habit {
   id: string;
+  userId: string;
   name: string;
+  frequency: 'daily' | 'weekly';
+  reminderTime?: string;
+  checkIns: string[];
   streak: number;
-  completed: boolean;
+  currentStreak: number;
+  longestStreak: number;
+  completedToday: boolean;
   progress: number;
 }
 
@@ -39,159 +46,303 @@ export interface Achievement {
   unlockedAt: string | null;
 }
 
+export interface User {
+  id: string;
+  username: string;
+  email: string;
+  avatar?: string;
+}
+
+export interface Note {
+  id: string;
+  title: string;
+  content: string;
+  ownerId: string;
+  collaborators: string[];
+  shareToken: string;
+  shareMode: 'view' | 'edit';
+  updatedAt: string;
+  createdAt: string;
+}
+
+export interface LeaderboardEntry {
+  id: string;
+  userId: string;
+  username: string;
+  habitName: string;
+  longestStreak: number;
+  avatar?: string;
+}
+
 interface AppContextType {
+  currentUser: User | null;
+  users: User[];
   habits: Habit[];
   goals: Goal[];
   journalEntries: JournalEntry[];
-  addHabit: (name: string) => void;
-  toggleHabit: (id: string) => void;
-  addGoal: (goal: Omit<Goal, "id" | "current" | "color" | "insights">) => void;
-  addJournalEntry: (entry: Omit<JournalEntry, "id" | "date">) => void;
-  achievements: Achievement[];
+  notes: Note[];
+  leaderboard: LeaderboardEntry[];
+  addHabit: (name: string, frequency?: 'daily' | 'weekly', reminderTime?: string) => Promise<void>;
+  toggleHabit: (id: string) => Promise<void>;
+  updateHabitReminder: (id: string, reminderTime: string) => Promise<void>;
+  addGoal: (goal: Omit<Goal, 'id' | 'current' | 'color' | 'insights'>) => Promise<void>;
+  addJournalEntry: (entry: Omit<JournalEntry, 'id' | 'date'>) => Promise<void>;
+  createNote: (title: string) => Promise<void>;
+  updateNoteContent: (id: string, content: string) => Promise<void>;
+  renameNote: (id: string, title: string) => Promise<void>;
+  deleteNote: (id: string) => Promise<void>;
+  signUp: (username: string, email: string, password: string) => Promise<boolean>;
+  signIn: (email: string, password: string) => Promise<boolean>;
+  signOut: () => void;
+  unlockAchievement: (id: string) => void;
 }
 
 const AppContext = createContext<AppContextType | undefined>(undefined);
 
-// Dummy seed data for phase 2 advanced analysis logic
-const initialHabits: Habit[] = [
-  { id: '1', name: "Morning Exercise", streak: 12, completed: true, progress: 100 },
-  { id: '2', name: "Reading", streak: 8, completed: true, progress: 100 },
-  { id: '3', name: "Meditation", streak: 15, completed: false, progress: 0 },
-  { id: '4', name: "Hydration", streak: 20, completed: true, progress: 100 },
-];
-
-const initialGoals: Goal[] = [
-  { id: '1', title: "Exercise 4 times per week", description: "Based on your mood patterns, regular exercise improves your emotional well-being by 23%", current: 3, target: 4, unit: "workouts", color: "primary", insights: ["Best days: Tuesday, Thursday", "Morning sessions most effective"] },
-  { id: '2', title: "Sleep 8 hours nightly", description: "Your energy levels are 15% higher on days with 7.5+ hours of sleep", current: 7.2, target: 8, unit: "hours", color: "accent", insights: ["Consistent bedtime helps", "Avoid screens after 9 PM"] },
-  { id: '3', title: "Meditate 10 minutes daily", description: "Meditation days correlate with 18% lower stress scores", current: 6, target: 10, unit: "minutes", color: "secondary", insights: ["Morning practice recommended", "Use breathing exercises"] }
-];
-
-const getPastDate = (daysAgo: number) => {
-  const d = new Date();
-  d.setDate(d.getDate() - daysAgo);
-  return d.toISOString();
-};
-
-const initialEntries: JournalEntry[] = [
-  { id: 'e1', date: getPastDate(1), mood: 8, energy: 7, stress: 4, sleepHours: 7.5, sleepQuality: 8, preview: "Had a productive day! Completed my workout and..." },
-  { id: 'e2', date: getPastDate(2), mood: 6, energy: 5, stress: 7, sleepHours: 6.0, sleepQuality: 5, preview: "Felt a bit tired but managed to stay focused on..." },
-  { id: 'e3', date: getPastDate(3), mood: 9, energy: 9, stress: 3, sleepHours: 8.5, sleepQuality: 9, preview: "Amazing day! Everything went smoothly and I felt..." },
-  { id: 'e4', date: getPastDate(4), mood: 7, energy: 6, stress: 5, sleepHours: 7.0, sleepQuality: 7, preview: "Normal day, got things done." },
-  { id: 'e5', date: getPastDate(5), mood: 8, energy: 8, stress: 4, sleepHours: 8.0, sleepQuality: 8, preview: "Good sleep made a huge difference today." },
-  { id: 'e6', date: getPastDate(6), mood: 5, energy: 4, stress: 8, sleepHours: 5.5, sleepQuality: 4, preview: "Rough night, feeling very sluggish." },
-];
-
 const initialAchievements: Achievement[] = [
-  { id: 'a1', title: "First Steps", description: "Log your first journal entry", icon: "book", unlockedAt: null },
-  { id: 'a2', title: "Consistent Logger", description: "Log 3 journal entries", icon: "pen", unlockedAt: null },
-  { id: 'a3', title: "Habit Builder", description: "Complete a habit", icon: "flame", unlockedAt: null },
+  { id: 'a1', title: 'First Steps', description: 'Log your first journal entry', icon: 'book', unlockedAt: null },
+  { id: 'a2', title: 'Consistent Logger', description: 'Log 3 journal entries', icon: 'pen', unlockedAt: null },
+  { id: 'a3', title: 'Habit Builder', description: 'Complete a habit', icon: 'flame', unlockedAt: null },
 ];
 
 export const AppProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [habits, setHabits] = useState<Habit[]>(() => {
-    const saved = localStorage.getItem('paradigm_habits');
-    return saved ? JSON.parse(saved) : initialHabits;
-  });
+  const [currentUser, setCurrentUser] = useState<User | null>(null);
+  const [users, setUsers] = useState<User[]>([]);
+  const [habits, setHabits] = useState<Habit[]>([]);
+  const [goals, setGoals] = useState<Goal[]>([]);
+  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>([]);
+  const [notes, setNotes] = useState<Note[]>([]);
+  const [leaderboard, setLeaderboard] = useState<LeaderboardEntry[]>([]);
+  const [achievements, setAchievements] = useState<Achievement[]>(initialAchievements);
+  const [isLoading, setIsLoading] = useState(true);
 
-  const [goals, setGoals] = useState<Goal[]>(() => {
-    const saved = localStorage.getItem('paradigm_goals');
-    return saved ? JSON.parse(saved) : initialGoals;
-  });
+  const handleApiError = (error: unknown, message: string) => {
+    console.error(error);
+    toast.error(message);
+  };
 
-  const [journalEntries, setJournalEntries] = useState<JournalEntry[]>(() => {
-    const saved = localStorage.getItem('paradigm_entries');
-    return saved ? JSON.parse(saved) : initialEntries;
-  });
+  const loadUserData = async () => {
+    if (!currentUser) return;
+    setIsLoading(true);
 
-  const [achievements, setAchievements] = useState<Achievement[]>(() => {
-    const saved = localStorage.getItem('paradigm_achievements');
-    return saved ? JSON.parse(saved) : initialAchievements;
-  });
+    try {
+      const [notesRes, habitsRes, goalsRes, journalRes, leaderboardRes] = await Promise.all([
+        api.notes.fetch(),
+        api.habits.fetch(),
+        api.goals.fetch(),
+        api.journal.fetch(),
+        api.leaderboard.fetch(),
+      ]);
+
+      setNotes(notesRes.notes || []);
+      setHabits(habitsRes.habits || []);
+      setGoals(goalsRes.goals || []);
+      setJournalEntries(journalRes.journalEntries || []);
+      setLeaderboard(leaderboardRes.leaderboard || []);
+    } catch (error) {
+      handleApiError(error, 'Unable to load workspace data.');
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   useEffect(() => {
-    localStorage.setItem('paradigm_habits', JSON.stringify(habits));
-  }, [habits]);
+    const restoreSession = async () => {
+      try {
+        const result = await api.auth.me();
+        setCurrentUser(result.user);
+        setUsers([result.user]);
+      } catch (error) {
+        api.auth.signOut();
+        setCurrentUser(null);
+        setUsers([]);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    restoreSession();
+  }, []);
 
   useEffect(() => {
-    localStorage.setItem('paradigm_goals', JSON.stringify(goals));
-  }, [goals]);
+    if (currentUser) {
+      loadUserData();
+    } else {
+      setHabits([]);
+      setGoals([]);
+      setJournalEntries([]);
+      setNotes([]);
+      setLeaderboard([]);
+      setIsLoading(false);
+    }
+  }, [currentUser]);
 
-  useEffect(() => {
-    localStorage.setItem('paradigm_entries', JSON.stringify(journalEntries));
-  }, [journalEntries]);
+  const signUp = async (username: string, email: string, password: string) => {
+    try {
+      const user = await api.auth.signUp(username, email, password);
+      setCurrentUser(user);
+      setUsers([user]);
+      toast.success('Account created successfully');
+      return true;
+    } catch (error) {
+      handleApiError(error, 'Sign up failed.');
+      return false;
+    }
+  };
 
-  useEffect(() => {
-    localStorage.setItem('paradigm_achievements', JSON.stringify(achievements));
-  }, [achievements]);
+  const signIn = async (email: string, password: string) => {
+    try {
+      const user = await api.auth.signIn(email, password);
+      setCurrentUser(user);
+      setUsers([user]);
+      toast.success(`Welcome back, ${user.username}`);
+      return true;
+    } catch (error) {
+      handleApiError(error, 'Sign in failed.');
+      return false;
+    }
+  };
+
+  const signOut = () => {
+    api.auth.signOut();
+    setCurrentUser(null);
+    setUsers([]);
+    setHabits([]);
+    setGoals([]);
+    setJournalEntries([]);
+    setNotes([]);
+    setLeaderboard([]);
+    toast.success('Signed out successfully');
+  };
+
+  const addHabit = async (name: string, frequency: 'daily' | 'weekly' = 'daily', reminderTime?: string) => {
+    try {
+      const result = await api.habits.create({ name, frequency, reminderTime });
+      setHabits((prev) => [result.habit, ...prev]);
+      toast.success('Habit created successfully');
+    } catch (error) {
+      handleApiError(error, 'Unable to create habit.');
+    }
+  };
+
+  const updateHabitReminder = async (id: string, reminderTime: string) => {
+    try {
+      const result = await api.habits.updateReminder(id, reminderTime);
+      setHabits((prev) => prev.map((habit) => (habit.id === id ? result.habit : habit)));
+      toast.success('Reminder updated');
+    } catch (error) {
+      handleApiError(error, 'Unable to update reminder.');
+    }
+  };
+
+  const markHabitForToday = async (id: string) => {
+    try {
+      const result = await api.habits.checkIn(id);
+      setHabits((prev) => prev.map((habit) => (habit.id === id ? result.habit : habit)));
+      toast.success('Habit progress saved');
+    } catch (error) {
+      handleApiError(error, 'Unable to update habit progress.');
+    }
+  };
+
+  const addGoal = async (goal: Omit<Goal, 'id' | 'current' | 'color' | 'insights'>) => {
+    try {
+      const result = await api.goals.create(goal);
+      setGoals((prev) => [result.goal, ...prev]);
+      toast.success('Goal saved successfully');
+    } catch (error) {
+      handleApiError(error, 'Unable to save goal.');
+    }
+  };
+
+  const addJournalEntry = async (entry: Omit<JournalEntry, 'id' | 'date'>) => {
+    try {
+      const result = await api.journal.create(entry);
+      setJournalEntries((prev) => [result.entry, ...prev]);
+      toast.success('Journal entry saved');
+    } catch (error) {
+      handleApiError(error, 'Unable to save journal entry.');
+    }
+  };
+
+  const createNote = async (title: string) => {
+    try {
+      const result = await api.notes.create(title);
+      setNotes((prev) => [result.note, ...prev]);
+      toast.success('Note created');
+    } catch (error) {
+      handleApiError(error, 'Unable to create note.');
+    }
+  };
+
+  const updateNoteContent = async (id: string, content: string) => {
+    try {
+      const result = await api.notes.update(id, { content });
+      setNotes((prev) => prev.map((note) => (note.id === id ? result.note : note)));
+    } catch (error) {
+      handleApiError(error, 'Unable to save note.');
+    }
+  };
+
+  const renameNote = async (id: string, title: string) => {
+    try {
+      const result = await api.notes.update(id, { title });
+      setNotes((prev) => prev.map((note) => (note.id === id ? result.note : note)));
+    } catch (error) {
+      handleApiError(error, 'Unable to rename note.');
+    }
+  };
+
+  const deleteNote = async (id: string) => {
+    try {
+      await api.notes.remove(id);
+      setNotes((prev) => prev.filter((note) => note.id !== id));
+      toast.success('Note deleted');
+    } catch (error) {
+      handleApiError(error, 'Unable to delete note.');
+    }
+  };
 
   const unlockAchievement = (id: string) => {
-    setAchievements(prev => {
-      const achievement = prev.find(a => a.id === id);
+    setAchievements((prev) => {
+      const achievement = prev.find((item) => item.id === id);
       if (achievement && !achievement.unlockedAt) {
         toast.success(`Achievement Unlocked: ${achievement.title}!`, {
           description: achievement.description,
         });
-        return prev.map(a => a.id === id ? { ...a, unlockedAt: new Date().toISOString() } : a);
+        return prev.map((item) =>
+          item.id === id ? { ...item, unlockedAt: new Date().toISOString() } : item,
+        );
       }
       return prev;
     });
   };
 
-  const addHabit = (name: string) => {
-    const newHabit: Habit = {
-      id: Date.now().toString(),
-      name,
-      streak: 0,
-      completed: false,
-      progress: 0,
-    };
-    setHabits([newHabit, ...habits]);
-  };
-
-  const toggleHabit = (id: string) => {
-    setHabits(habits.map(h => {
-      if (h.id === id) {
-        const completed = !h.completed;
-        if (completed) {
-          unlockAchievement('a3');
-        }
-        return { ...h, completed, progress: completed ? 100 : 0 };
-      }
-      return h;
-    }));
-  };
-
-  const addGoal = (goal: Omit<Goal, "id" | "current" | "color" | "insights">) => {
-    const newGoal: Goal = {
-      ...goal,
-      id: Date.now().toString(),
-      current: 0,
-      color: "primary",
-      insights: ["Keep tracking to gather insights"],
-    };
-    setGoals([newGoal, ...goals]);
-  };
-
-  const addJournalEntry = (entry: Omit<JournalEntry, "id" | "date">) => {
-    const newEntry: JournalEntry = {
-      ...entry,
-      id: Date.now().toString(),
-      date: new Date().toISOString(),
-    };
-    const newEntries = [newEntry, ...journalEntries];
-    setJournalEntries(newEntries);
-    
-    // Check achievements
-    if (newEntries.length === 1 || newEntries.length === 7) {
-      unlockAchievement('a1'); 
-    }
-    if (newEntries.length >= 3) {
-      unlockAchievement('a2');
-    }
-  };
-
   return (
-    <AppContext.Provider value={{ habits, goals, journalEntries, achievements, addHabit, toggleHabit, addGoal, addJournalEntry }}>
+    <AppContext.Provider
+      value={{
+        currentUser,
+        users,
+        habits,
+        goals,
+        journalEntries,
+        notes,
+        leaderboard,
+        addHabit,
+        toggleHabit: markHabitForToday,
+        updateHabitReminder,
+        addGoal,
+        addJournalEntry,
+        createNote,
+        updateNoteContent,
+        renameNote,
+        deleteNote,
+        signUp,
+        signIn,
+        signOut,
+        unlockAchievement,
+      }}
+    >
       {children}
     </AppContext.Provider>
   );

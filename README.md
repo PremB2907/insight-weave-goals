@@ -1,9 +1,9 @@
-# PARADIGM: Mindful Habit & Goal Setter (Web MVP)
+# PARADIGM: CollabNotes + HabitFlow (Web MVP)
 
 🔗 Live Application: https://insight-weave-goals.lovable.app  
 📦 Repository: https://github.com/PremB2907/insight-weave-goals  
 
-PARADIGM is a **progressive web application** designed to uncover the hidden connections between your daily habits, sleep patterns, and emotional state. It transforms basic tracking into intelligent, automated insights.
+PARADIGM is a **unified productivity platform** combining real-time shared notes with habit tracking, streaks, reminders, and a public leaderboard. It helps users stay accountable with both collaboration and daily behavior momentum.
 
 ---
 

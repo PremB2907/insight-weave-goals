@@ -49,12 +49,12 @@ const Index = () => {
           <div className="grid lg:grid-cols-2 gap-12 items-center">
             <div className="space-y-6">
               <h1 className="text-5xl md:text-6xl font-bold leading-tight">
-                Transform Your
-                <span className="text-primary"> Daily Habits</span> Into
-                <span className="text-secondary"> Meaningful Growth</span>
+                Build Better Habits and
+                <span className="text-primary"> Collaborate Faster</span>
+                <span className="text-secondary"> in One Platform</span>
               </h1>
               <p className="text-xl text-muted-foreground leading-relaxed">
-                PARADIGM helps you understand the connection between your habits, sleep, and emotional well-being through intelligent tracking and personalized insights.
+                PARADIGM now combines shared notes, habit streak tracking, and public leaderboard momentum so you can stay accountable and move faster.
               </p>
               <div className="flex flex-col sm:flex-row gap-4">
                 <NavLink

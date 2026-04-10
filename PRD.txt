@@ -1,0 +1,179 @@
+CollabNotes + HabitFlow — Unified Productivity Platform
+Product Requirements Document · Envisage Hackathon WD-002
+Version 1.0
+April 10, 2026
+Team: 3 members
+Deadline: April 20, 2026
+Two modules · One platform
+1. Overview
+What this is
+WD-002 is a single product statement with two integrated modules: (1) a minimal real-time collaborative notes app, and (2) a habit tracker with streaks, in-app reminders, and a public leaderboard. Both modules share one auth system, one codebase, and one deployment — making it a unified personal productivity platform.
+Module A — CollabNotes
+Real-time collaborative document editor. Multiple users edit the same note simultaneously. Minimal UI — no bloat, just clean writing and live cursors.
+Module B — HabitFlow
+Habit tracker with daily check-ins, streak counters, in-browser reminder alerts, and a public leaderboard showing top streaks across the platform.
+2. Users & goals
+SO
+Solo user
+Creates personal notes and tracks daily habits. Wants streaks and reminders to stay accountable. Sees their rank on the public leaderboard.
+CO
+Collaborator
+Joins a shared note via invite link. Edits alongside others in real time. Sees live cursors and presence indicators for other editors.
+VI
+Public visitor (leaderboard)
+Views the public leaderboard without signing in. Sees top users by streak count — motivates sign-up through social proof.
+3. Scope
+Feature	Module	Status
+User auth (email/password + JWT)	Shared	in scope
+Create, rename, delete notes	CollabNotes	in scope
+Real-time multi-user editing (WebSocket / Socket.io)	CollabNotes	in scope
+Live cursor presence (colored cursors per user)	CollabNotes	in scope
+Share note via invite link (view + edit modes)	CollabNotes	in scope
+Auto-save (debounced, every 2s)	CollabNotes	in scope
+Habit creation (name, frequency: daily/weekly)	HabitFlow	in scope
+Daily check-in (mark complete)	HabitFlow	in scope
+Streak counter (current + longest streak)	HabitFlow	in scope
+In-browser reminder (notification API + time picker)	HabitFlow	in scope
+Public leaderboard (top 20 by longest streak, no auth required)	HabitFlow	in scope
+Habit history calendar (GitHub-style heatmap)	HabitFlow	in scope
+Rich text / markdown formatting in notes	CollabNotes	out of scope
+Email / push notification reminders	HabitFlow	out of scope
+Note version history	CollabNotes	out of scope
+Mobile app	Both	out of scope
+4. Features & priority
+Module A — CollabNotes
+P1 · must have
+Real-time sync
+Socket.io rooms per note. All keystrokes broadcast instantly to connected editors. Operational transforms or last-write-wins for conflict resolution (CRDT optional).
+P1 · must have
+Note management
+Sidebar list of user's notes. Create, rename, delete. Click to open in editor pane. Notes persist in DB between sessions.
+P1 · must have
+Presence indicators
+Each active editor gets an assigned color. Colored cursor + username label shown live in the text. Online user avatars shown in top bar.
+P2 · should have
+Shareable link
+Owner generates a link with read-only or edit permission. Recipients join the note's Socket.io room via the link — no account needed for view-only.
+P2 · should have
+Auto-save indicator
+Debounced save every 2s. Shows "Saving…" → "Saved" status in UI. Prevents data loss on tab close.
+P3 · nice to have
+Basic text formatting
+Bold, italic, headings via keyboard shortcuts only (no toolbar). Stored as plain markdown in DB.
+Module B — HabitFlow
+P1 · must have
+Habit creation & check-in
+User creates habits with a name and daily/weekly frequency. Dashboard shows all habits with a one-click "Done today" button. Resets at midnight UTC.
+P1 · must have
+Streak engine
+Backend calculates current streak (consecutive days checked) and longest streak ever. Streak breaks if a day is missed. Both values shown on the habit card.
+P1 · must have
+Public leaderboard
+Top 20 users ranked by longest streak. Publicly accessible (no login). Shows username, habit name, streak count. Refreshes every 5 minutes.
+P2 · should have
+In-browser reminders
+User sets a daily reminder time per habit. Browser Notification API fires an alert at that time. Requires notification permission grant on first use.
+P2 · should have
+Habit heatmap calendar
+GitHub-style activity grid showing check-in history for the last 12 weeks. Green intensity = consistency. Strong visual for jury demo.
+P3 · nice to have
+Streak milestone badges
+Auto-award badges at 7, 30, 100 day streaks. Shown on user's profile and leaderboard row. Adds gamification layer.
+5. User flows
+CollabNotes flow
+1
+Sign up / log in
+Single auth for both modules.
+2
+Create a note
+Click "+ New Note" → auto-titled "Untitled". Opens in editor.
+3
+Invite collaborators
+Copy share link → paste in chat/email to teammate.
+4
+Co-edit in real time
+Both users type simultaneously. Colored cursors visible.
+5
+Auto-save
+Content persists — reopen anytime from sidebar.
+HabitFlow flow
+1
+Create a habit
+Name + frequency (daily). Set reminder time (optional).
+2
+Daily check-in
+Click "Done today" button. Streak increments by 1.
+3
+Reminder fires
+Browser notification at set time if not yet checked in.
+4
+View heatmap
+See consistency over 12 weeks on the habit card.
+5
+Check leaderboard
+Public page shows top streaks — no login needed.
+6. Tech stack
+Frontend
+ReactTailwind CSSSocket.io-clientBrowser Notification API
+Backend
+Node.js + ExpressSocket.ioJWT authREST API
+Database
+MongoDB AtlasMongoose
+Hosting
+Vercel (frontend)Render (backend)GitHub
+Key architecture note — real-time
+Each note gets a Socket.io room (ID = noteId). On join, server sends full current content. On change, client emits a delta; server broadcasts to all room members and debounces DB write. For MVP, last-write-wins is sufficient — no CRDT needed.
+7. Data models (simplified)
+Note
+_id, title, content (string),
+ownerId, collaborators[ ],
+shareToken, shareMode (view|edit),
+updatedAt, createdAt
+Habit
+_id, userId, name,
+frequency (daily|weekly),
+reminderTime (HH:MM),
+currentStreak, longestStreak,
+checkIns[ ] (ISO date strings)
+8. Jury criteria mapping
+Innovation
+Two fully functional modules in one platform. Real-time collab + gamified habit tracking is a compelling combo with cross-module shared auth making it feel like a real product, not two demos stitched together.
+Feasibility
+Your existing GitHub repo (insight-weave-goals) shows prior habit tracker work. Socket.io real-time is well-documented. Three full-stack members makes the split clean: one per module + one shared backend.
+Impact
+Addresses everyday productivity pain points — note-taking and habit building — that any jury member can immediately relate to and see value in.
+Presentation
+Live demo of two users editing the same note simultaneously is highly visual and memorable. Heatmap + leaderboard gives the jury interactive elements to explore during Q&A
+9. Risks & mitigations
+Socket.io complexity
+Start with a bare-bones broadcast (no CRDT). Last-write-wins is fine for a 10-day MVP — document it as a known tradeoff in the PPT.
+Splitting 2 modules in 10 days
+Assign member A to CollabNotes frontend, member B to HabitFlow frontend, member C to shared backend + deployment. No cross-dependency blocking.
+Browser Notification API blocked
+Prompt permission early on onboarding. Show a fallback in-app toast reminder if notifications are denied.
+Leaderboard cold start (no users)
+Seed 10–15 demo accounts with varied streaks before the submission demo. Makes the leaderboard look real and engaging for judges.
+Streak timezone bugs
+Normalize all check-in timestamps to UTC midnight on the backend. Do not rely on client-side date logic for streak calculation.
+10. Deliverables checklist
+Working deployed MVP (URL)
+PPT presentation
+YouTube walkthrough video
+GitHub repo (clean README)
+Live collab demo (2 browser tabs)
+Seeded leaderboard (10+ users)
+Habit heatmap visible in demo
+Reminder notification demo
+11. Timeline
+1
+Days 1–2 (Apr 10–11)
+Shared auth system, DB schema, project structure, repo setup. Assign modules to team members.
+2
+Days 3–5 (Apr 12–14)
+CollabNotes: Socket.io room, editor, note CRUD. HabitFlow: habit creation, check-in API, streak engine.
+3
+Days 6–8 (Apr 15–17)
+CollabNotes: live cursors, share link. HabitFlow: leaderboard, heatmap calendar, reminder notification.
+4
+Days 9–10 (Apr 18–19)
+Seed demo data, UI polish, record YouTube video, build PPT. Deploy + QA. Submit by Apr 20.

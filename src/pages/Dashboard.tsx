@@ -107,7 +107,7 @@ const Dashboard = () => {
                         <div className="flex items-center space-x-3">
                           <div
                             className={`w-10 h-10 rounded-lg flex items-center justify-center ${
-                              habit.completed ? "bg-primary text-primary-foreground" : "bg-muted"
+                              habit.completedToday ? "bg-primary text-primary-foreground" : "bg-muted"
                             }`}
                           >
                             <Activity className="w-5 h-5" />
@@ -120,11 +120,11 @@ const Dashboard = () => {
                           </div>
                         </div>
                         <Button
-                          variant={habit.completed ? "default" : "outline"}
-                          className={habit.completed ? "bg-accent" : ""}
+                          variant={habit.completedToday ? "default" : "outline"}
+                          className={habit.completedToday ? "bg-accent" : ""}
                           onClick={() => toggleHabit(habit.id)}
                         >
-                          {habit.completed ? "Completed" : "Mark Done"}
+                          {habit.completedToday ? "Completed" : "Mark Done"}
                         </Button>
                       </div>
                       <Progress value={habit.progress} className="h-2" />
